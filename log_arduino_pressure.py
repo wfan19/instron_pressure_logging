@@ -1,16 +1,34 @@
 #!/usr/bin/env python3
 
 import serial
+from datetime import datetime
+import os
 
-with serial.Serial("/dev/ttyACM0", 115200, timeout=5) as arduino:
-    try:
-        while True:
-            b_newline = arduino.readline()
-            b_newline = b_newline[0:-2]
-            str_newline = b_newline.decode()
-            print(str_newline)
-    except Exception as e:
-        if isinstance(e, KeyboardInterrupt):
-            print("Killing program")
-        else:
-            print(e)
+arduino = serial.Serial("/dev/ttyACM0", 115200, timeout=5)
+
+def get_filename():
+    now = datetime.now()
+    now_str = now.strftime("%d-%m-%Y-%H-%M-%S")
+    filename = os.getcwd() + "/" + now_str + ".txt"
+    return filename
+
+f = open(get_filename(), 'w')
+n_lines = 0
+arduino.read_all() # Clear the buffer before we start logging
+while True:
+    # Get the string
+    b_newline = arduino.readline()
+    str_newline = b_newline.decode()
+    
+    # Check if it's a signal for a new file
+    if "Logging start" in str_newline:
+        f.close()
+        if n_lines < 100:
+            os.remove(f.name)
+        f = open(get_filename(), 'w')
+        n_lines = 0
+        
+    print(str_newline, end="")
+    n_lines += 1
+
+    f.write(str_newline)
