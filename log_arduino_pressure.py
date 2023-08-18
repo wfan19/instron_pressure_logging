@@ -9,7 +9,7 @@ arduino = serial.Serial("COM7", 115200, timeout=5)
 def get_filename():
     now = datetime.now()
     now_str = now.strftime("%d-%m-%Y-%H-%M-%S")
-    filename = os.getcwd() + "/" + now_str + ".txt"
+    filename = os.getcwd() + "/data/" + now_str + ".txt"
     return filename
 
 f = open(get_filename(), 'w')
