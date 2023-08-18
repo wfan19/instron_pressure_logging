@@ -4,7 +4,7 @@ import serial
 from datetime import datetime
 import os
 
-arduino = serial.Serial("/dev/ttyACM0", 115200, timeout=5)
+arduino = serial.Serial("COM7", 115200, timeout=5)
 
 def get_filename():
     now = datetime.now()
