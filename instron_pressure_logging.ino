@@ -1,16 +1,26 @@
-int instron_signal_pin = 7;
+int instron_new_file_pin = 7;       // Instron digital output 1
+int instron_active_logging_pin = 8; // Instron digital output 2
 int pressure_sensor_pin = A0;
 unsigned long start_time = 0;
 
 bool last_logging = 0;
 
 void setup() {
-  pinMode(instron_signal_pin, INPUT);
+  pinMode(instron_new_file_pin, INPUT);
+  pinMode(instron_active_logging_pin, INPUT);
+  
   Serial.begin(115200);
 }
 
 void loop() {
-  bool new_logging = digitalRead(instron_signal_pin);
+  // **Boolean flags for controlling the logging state from the Instron software**
+  // Indicate test is active and a new file should be created
+  bool new_logging = digitalRead(instron_new_file_pin); 
+  
+  // Indicate the current segment of the test should log pressures.
+  bool active_logging = digitalRead(instron_active_logging_pin); 
+
+  // Detect the start of a new logging sesison: "rising edge" of the new_file pin.
   if ((last_logging == 0) && (new_logging == 1)) {
     start_time = millis();
     Serial.println("Logging start");
@@ -21,13 +31,13 @@ void loop() {
   // Read the pressure, and print it if we are logging
   float pressure_volts = analogRead(pressure_sensor_pin) / 1024. * 5;
   float pressure = v_to_pressure(pressure_volts);
-  if (new_logging) {
+  if (new_logging && active_logging) {
     unsigned long t = millis() - start_time;
     Serial.println(String(t) + "," + String(pressure));
   }
 
   last_logging = new_logging;
-  delay(100);
+  delay(10);
 }
 
 float v_to_pressure(float voltage) {

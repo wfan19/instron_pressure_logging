@@ -22,11 +22,20 @@ while True:
     
     # Check if it's a signal for a new file
     if "Logging start" in str_newline:
+        # Close the previous file
         f.close()
         if n_lines < 100:
+            # Remove files that are too short.
+            # This is because during testing, if the digital pin is unplugged, it''ll
+            # rapidly switch between on-off, which will create a lot of junk files.
             os.remove(f.name)
+
+        # Create a new file
         f = open(get_filename(), 'w')
         n_lines = 0
+
+        # Units are in Time(ms) and Pressure(psi).
+        str_newline = "Time,Pressure"
         
     print(str_newline, end="")
     n_lines += 1
